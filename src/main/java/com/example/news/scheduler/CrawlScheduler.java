@@ -16,9 +16,9 @@ public class CrawlScheduler {
     public void scheduleCrawl() {
         try {
             crawlService.crawlFromTuoitre();
-            System.out.println("✅ Cronjob crawl RSS chạy lúc: " + new java.util.Date());
+            System.out.println("Cronjob crawl RSS chạy lúc: " + new java.util.Date());
         } catch (Exception e) {
-            System.err.println("❌ Lỗi cronjob:");
+            System.err.println("Lỗi cronjob:");
             e.printStackTrace();
         }
     }
