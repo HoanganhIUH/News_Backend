@@ -21,7 +21,6 @@ import java.util.Optional;
 @Service
 public class CrawlService {
 
-    private static final String RSS_URL = "https://tuoitre.vn/rss/tin-moi-nhat.rss";
 
     @Autowired
     private ArticleRepository articleRepository;
@@ -29,58 +28,6 @@ public class CrawlService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-//    @Transactional
-//    public void crawlFromRss() throws IOException {
-//        Document rssDoc = Jsoup.connect(RSS_URL).get();
-//        Elements items = rssDoc.select("item");
-//
-//        System.out.println("Tổng số bài trong RSS: " + items.size());
-//
-//        for (Element item : items) {
-//            String title = item.selectFirst("title").text();
-//            String link = item.selectFirst("link").text();
-//            String pubDateStr = item.selectFirst("pubDate").text(); // Bạn có thể parse pubDate nếu cần
-//
-//            // Kiểm tra đã tồn tại chưa
-//            Optional<Article> existing = articleRepository.findAll().stream()
-//                .filter(a -> a.getUrl().equals(link))
-//                .findFirst();
-//            if (existing.isPresent()) continue;
-//
-//            // Lấy chi tiết bài viết
-//            Document detailDoc = Jsoup.connect(link)
-//                .userAgent("Mozilla/5.0")
-//                .timeout(10_000)
-//                .get();
-//
-//            String content = detailDoc.select(".detail-content").text();
-//
-//            // Lấy category từ breadcrumbs nếu có
-//            String categoryName = detailDoc.select(".bread-crumbs .item a").last() != null
-//                ? detailDoc.select(".bread-crumbs .item a").last().text()
-//                : "Tin mới";
-//
-//            Category category = categoryRepository.findAll().stream()
-//                .filter(c -> c.getName().equalsIgnoreCase(categoryName))
-//                .findFirst()
-//                .orElseGet(() -> {
-//                    Category newCat = new Category();
-//                    newCat.setName(categoryName);
-//                    return categoryRepository.save(newCat);
-//                });
-//
-//            Article article = new Article();
-//            article.setTitle(title);
-//            article.setUrl(link);
-//            article.setContent(content);
-//            article.setPublishedAt(LocalDateTime.now());
-//            article.setCategory(category);
-//
-//            articleRepository.save(article);
-//
-//            System.out.println("Đã lưu: " + title);
-//        }
-//    }
 
     @Transactional
     public void crawlFromTuoitre() throws IOException {
@@ -159,7 +106,8 @@ public class CrawlService {
                         return categoryRepository.save(newCat);
                     });
 
-                if (articleRepository.findAll().stream().noneMatch(a -> a.getUrl().equals(articleUrl))) {
+                // Kiểm tra trùng lặp url tối ưu
+                if (!articleRepository.existsByUrl(articleUrl)) {
                     Article article = new Article();
                     article.setTitle(title); // Đảm bảo title đã được cập nhật
                     article.setContent(content);
